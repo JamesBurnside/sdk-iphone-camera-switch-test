@@ -1,9 +1,11 @@
 # sdk-iphone-camera-switch-test
 
-## Build
+## Setup
 
-`nox webpack`
+- Clone repo
+- `npm install`
+- Set the token in the `index.html` file with one generated from Azure Communication Services Resource in the Azure Portal
 
 ## Run
 
-open `index.html` in a browser
+`npm start`
