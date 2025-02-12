@@ -36,6 +36,11 @@ async function main() {
   call.on('stateChanged', () => {
     callStatusSpan.innerText = call.state;
   });
+  const callIdSpan = document.getElementById('callId');
+  callIdSpan.innerText = call.id;
+  call.on('idChanged', () => {
+    callIdSpan.innerText = call.id;
+  });
 
   // SETUP REMOTE PARTICIPANTS IN CALL
   const remoteParticipantsDiv = document.getElementById('remoteParticipants');
