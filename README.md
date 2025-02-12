@@ -4,8 +4,9 @@
 
 - Clone repo
 - `npm install`
-- Set the token in the `index.html` file with one generated from Azure Communication Services Resource in the Azure Portal
 
 ## Run
 
-`npm start`
+- `npm start`
+- Open localhost:9000 in browser
+- Paste a user token from Azure portal into the input field
