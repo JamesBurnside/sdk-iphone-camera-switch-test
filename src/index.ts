@@ -1,13 +1,20 @@
-import { CallClient, LocalVideoStream, VideoStreamRenderer, VideoStreamRendererView } from "@azure/communication-calling";
+import { Call, CallClient, LocalVideoStream, VideoStreamRenderer, VideoStreamRendererView } from "@azure/communication-calling";
 import { AzureCommunicationTokenCredential } from "@azure/communication-common";
 
-const groupId = '1b2509c5-3229-4b3f-9a1a-aabdb1c8510e';
+const groupId = '9d5ec556-3677-4c5b-a648-cfeb05f90658';
+
+// Mobile its a pain to get the token, so we have a default one that is auto applied
+const defaultMobileToken = '<REPLACE_ME>';
+
+let chosenCameraCounter = 0;
 
 async function main() {
   console.log('Starting app');
 
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
   // await for input of #userTokenInput to have value
-  const token = await new Promise<string>((resolve) => {
+  const token = (isAndroid || isIos) ? defaultMobileToken : await new Promise<string>((resolve) => {
     const userTokenInput = document.getElementById('userTokenInput') as HTMLInputElement;
     userTokenInput.addEventListener('input', () => {
       userTokenInput.disabled = true;
@@ -187,20 +194,22 @@ async function main() {
 
   // SETUP SWITCH CAMERA BUTTON
   const switchCameraButton = document.getElementById('switchCameraButton') as HTMLButtonElement;
-  let chosenCameraCounter = 0;
   switchCameraButton.addEventListener('click', async () => {
     switchCameraButton.disabled = true;
     try {
-      if (!localVideoStream) {
-        console.error('Local video stream not started, cannot switch camera source');
-        return;
-      }
-      const cameras = await deviceManager.getCameras();
-      const currentCamera = call.localVideoStreams[0].source;
-      const newCamera = cameras[(++chosenCameraCounter) % cameras.length]; // Cycle through cameras
-      chosenCameraLabel.innerText = `${newCamera.name}`;
-      console.log('Switching camera source', currentCamera, newCamera);
-      await localVideoStream.switchSource(newCamera);
+      await switchCameraSource(call, localVideoStream, deviceManager, chosenCameraLabel);
+      let intervalCounter = 0;
+      setInterval(async () => {
+        if (intervalCounter > 50) {
+          return;
+        }
+
+        await switchCameraSource(call, localVideoStream, deviceManager, chosenCameraLabel);
+        intervalCounter++;
+      }, 50);
+
+      // sleep 1 second to allow camera to switch
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
     } finally {
       switchCameraButton.disabled = false;
     }
@@ -217,5 +226,18 @@ async function main() {
     }
   });
 }
+
+const switchCameraSource = async (call: Call, localVideoStream: LocalVideoStream, deviceManager: any, chosenCameraLabel: HTMLElement) => {
+  if (!localVideoStream) {
+    console.error('Local video stream not started, cannot switch camera source');
+    return;
+  }
+  const cameras = await deviceManager.getCameras();
+  const currentCamera = call.localVideoStreams[0].source;
+  const newCamera = cameras[(++chosenCameraCounter) % cameras.length]; // Cycle through cameras
+  chosenCameraLabel.innerText = `${newCamera.name}`;
+  console.log('Switching camera source', currentCamera, newCamera);
+  await localVideoStream.switchSource(newCamera);
+};
 
 main();
