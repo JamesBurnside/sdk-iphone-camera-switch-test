@@ -206,10 +206,7 @@ async function main() {
 
         await switchCameraSource(call, localVideoStream, deviceManager, chosenCameraLabel);
         intervalCounter++;
-      }, 50);
-
-      // sleep 1 second to allow camera to switch
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      }, 1000);
     } finally {
       switchCameraButton.disabled = false;
     }
